@@ -4,6 +4,7 @@ from discord.ext import commands
 from discord import app_commands
 from dotenv import load_dotenv
 import random
+from keep_alive import keep_alive
 
 # Load environment variables from .env file
 load_dotenv()
@@ -112,4 +113,5 @@ async def on_message(message):
     await bot.process_commands(message)
 
 # Run the bot with the token from environment variable
+keep_alive()
 bot.run(os.getenv('TOKEN'))
