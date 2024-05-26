@@ -13,7 +13,7 @@ intents = discord.Intents.default()
 intents.message_content = True  # Ensure the correct intents are enabled
 
 # Create the bot instance
-bot = commands.Bot(command_prefix="-", intents=intents)
+bot = commands.Bot(command_prefix="!", intents=intents)
 
 # State variables for mimic mode
 mimic_mode = False
