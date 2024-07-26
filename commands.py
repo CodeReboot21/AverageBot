@@ -5,6 +5,7 @@ from discord import app_commands
 from keep_alive import keep_alive
 import random
 from bot_init import bot, jump_start
+import asyncio
 import requests
 
 keep_alive()
@@ -134,3 +135,88 @@ async def joke(ctx: commands.Context):
         await ctx.send(data["joke"])
     else:
         await ctx.send(f"{data['setup']} - {data['delivery']}")
+
+@bot.hybrid_command(name='trivia')
+async def trivia(ctx: commands.Context):
+    """Ask a trivia question"""
+    questions = [
+        ("What is the capital of France?", "Paris"),
+        ("What is the largest planet in our solar system?", "Jupiter"),
+        ("Who wrote 'Romeo and Juliet'?", "William Shakespeare"),
+        ("What is the chemical symbol for water?", "H2O"),
+        ("Who painted the Mona Lisa?", "Leonardo da Vinci"),
+        ("What is the smallest country in the world?", "Vatican City"),
+        ("What is the tallest mountain in the world?", "Mount Everest"),
+        ("Who is known as the father of computers?", "Charles Babbage"),
+        ("What is the hardest natural substance on Earth?", "Diamond"),
+        ("Which planet is known as the Red Planet?", "Mars"),
+        ("What is the fastest land animal?", "Cheetah"),
+        ("Who discovered penicillin?", "Alexander Fleming"),
+        ("What is the longest river in the world?", "Nile River"),
+        ("What is the main ingredient in traditional Japanese miso soup?", "Miso paste"),
+        ("Who was the first man to walk on the moon?", "Neil Armstrong"),
+        ("What is the largest ocean on Earth?", "Pacific Ocean"),
+        ("Who developed the theory of relativity?", "Albert Einstein"),
+        ("What is the capital of Japan?", "Tokyo"),
+        ("What is the primary language spoken in Brazil?", "Portuguese"),
+        ("Who directed the movie 'Jaws'?", "Steven Spielberg"),
+        ("What is the currency of the United Kingdom?", "Pound Sterling"),
+        ("What is the name of the first artificial satellite launched by the Soviet Union in 1957?", "Sputnik"),
+        ("Which element has the chemical symbol 'O'?", "Oxygen"),
+        ("What is the most widely spoken language in the world?", "Mandarin Chinese"),
+        ("Who wrote the 'Harry Potter' series?", "J.K. Rowling"),
+        ("What is the capital of Canada?", "Ottawa"),
+        ("What year did the Titanic sink?", "1912"),
+        ("What is the main ingredient in guacamole?", "Avocado"),
+        ("Who painted the ceiling of the Sistine Chapel?", "Michelangelo"),
+        ("What is the largest mammal in the world?", "Blue Whale")
+    ]
+
+    question, answer = random.choice(questions)
+
+    def check(m):
+        return m.author == ctx.author and m.channel == ctx.channel
+
+    await ctx.send(question)
+
+    try:
+        response = await bot.wait_for('message', timeout=30.0, check=check)
+        if response.content.lower() == answer.lower():
+            await ctx.send(f"Correct! The answer is {answer}.")
+        else:
+            await ctx.send(f"Wrong! The correct answer is {answer}.")
+    except asyncio.TimeoutError:
+        await ctx.send(f"Time's up! The correct answer was {answer}.")
+
+@bot.hybrid_command(name='quote')
+async def quote(ctx: commands.Context):
+    """Fetches and displays a random inspirational quote."""
+    url = "https://api.quotable.io/random"
+
+    response = requests.get(url)
+    data = response.json()
+
+    if response.status_code == 200:
+        await ctx.send(f"{data['content']} — {data['author']}")
+    else:
+        await ctx.send("Could not retrieve a quote at this time.")
+
+@bot.hybrid_command(name='fact')
+async def fact(ctx: commands.Context):
+    """Fetches and displays a random fact."""
+    url = "https://uselessfacts.jsph.pl/random.json?language=en"
+
+    response = requests.get(url)
+    data = response.json()
+
+    if response.status_code == 200:
+        # Use respond() for interactions and send() for regular messages
+        if ctx.interaction:
+            await ctx.interaction.response.send_message(data['text'])
+        else:
+            await ctx.send(data['text'])
+    else:
+        if ctx.interaction:
+            await ctx.interaction.response.send_message("Could not retrieve a fact at this time.")
+        else:
+            await ctx.send("Could not retrieve a fact at this time.")
